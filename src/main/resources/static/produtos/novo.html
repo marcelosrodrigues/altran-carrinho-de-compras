@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+<!-- Meta tags Obrigatórias -->
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+	integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+	crossorigin="anonymous">
+
+<title>Carrinho de Compras</title>
+</head>
+
+<body>
+
+	<div class="container">
+		<h1>Produtos</h1>
+
+		<form id="usuario">
+		
+			<input type="hidden" id="id" name="id" class="form-control"/>
+		
+			<div class="form-group">
+				<label for="nome">Nome</label>
+				<input type="text" id="nome" name="nome" class="form-control"/>
+			</div>
+			
+			<div class="form-group">
+				<label for="email">Preço</label>
+				<input type="number" id="valor" name="valor" class="form-control" step="any"/>
+			</div>
+		
+		</form>
+		
+		<button class="btn btn-info">Salvar</button>
+
+	</div>
+
+
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+		integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+		integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+		crossorigin="anonymous"></script>
+		
+	<script>
+	
+		var produto = (new URL(location.href)).searchParams.get('id');
+		
+		if( produto != null ){
+			$.getJSON('/api/produtos/' + produto, function(data) {
+				$("#id").val(produto);
+				$("#nome").val(data.nome);
+				$("#valor").val(data.valor);
+			});
+		}
+	
+	
+		$("button").click(function(){
+			
+			var produto = (new URL(location.href)).searchParams.get('id');
+			var json = "";
+			if( produto != null ){			
+				json = "{\"id\":" + produto + ", \"nome\":\"" + $("#nome").val() + "\", \"valor\": \"" + $("#valor").val() + "\"}";
+			} else {
+				json = "{\"nome\":\"" + $("#nome").val() + "\", \"valor\": \"" + $("#valor").val() + "\"}";
+			}
+			
+			console.log(json);
+			console.log(produto != null ? "PUT" : "POST");
+			
+			$.ajax({
+				  type: produto != null ? "PUT" : "POST",
+				  url: produto != null ? "/api/produtos/" + produto : "/api/produtos",
+				  data: json,
+				  dataType: "json",
+				  contentType: 'application/json',
+				  statusCode: {
+					  200: function(){
+							window.location.href = 'http://localhost:8080/produtos/index.html';
+						}
+				  }
+				});	
+		});
+		
+	
+	</script>	
+
+</body>
+
+
+</html>

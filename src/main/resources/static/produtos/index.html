@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+<!-- Meta tags Obrigatórias -->
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+	integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+	crossorigin="anonymous">
+
+<title>Carrinho de Compras</title>
+</head>
+
+<body>
+
+	<div class="container">
+		<h1>Produtos</h1>
+
+		<table class="table">
+			<thead>
+				<tr>
+					<th scope="col">#</th>
+					<th scope="col">Nome</th>
+					<th scope="col">Preço</th>		
+					<th></th>			
+				</tr>
+			</thead>
+			<tbody>
+				
+			</tbody>
+		</table>
+		
+		<a href="/produtos/novo.html" class="btn btn-info">Novo</a>
+
+	</div>
+
+
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+		integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+		integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+		crossorigin="anonymous"></script>
+		
+	<script>
+	
+ 	$.getJSON('/api/produtos', function(data) {
+        $.each(data, function(index) {
+            $("table > tbody").append("<tr>" + 
+				"<th scope=\"row\">"+ data[index].id +"</th>" + 
+				"<td>"+ data[index].nome +"</td>" + 
+				"<td>"+ data[index].valor +"</td>" +
+				"<td><button id=\"excluir\" produto=\"" + data[index].id + "\" class=\"btn btn-danger\">Excluir</button>" +
+				"<td><a href=\"/produtos/novo.html?id=" + data[index].id + "\" class=\"btn btn-info\">Editar</a>" +
+				"</tr>")
+        });
+        
+    	$("#excluir").on("click", function(event) {
+     		
+     		var usuario = $(this).attr("produto");
+     		
+     		console.log(usuario); 		
+    					
+    		$.ajax({
+    			  type: "DELETE",
+    			  url: "/api/produtos/" + usuario,
+    			  dataType: "json",
+    			  contentType: 'application/json',
+    			  statusCode: {
+    				  200: function(){
+    						window.location.href = 'http://localhost:8080/produtos/index.html';
+    					}
+    			  }
+    			});	
+     		
+     	});
+        
+    });
+	 		
+	</script>	
+
+</body>
+
+
+</html>

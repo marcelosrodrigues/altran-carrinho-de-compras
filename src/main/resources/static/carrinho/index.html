@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+<!-- Meta tags Obrigatórias -->
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+	integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+	crossorigin="anonymous">
+
+<title>Carrinho de Compras</title>
+</head>
+
+<body>
+
+	<div class="container">
+		<h1>Produtos</h1>
+		
+		<input type="hidden" id="carrinho" name="carrinho" />
+
+		<table class="table" id="produtos">
+			<thead>
+				<tr>
+					<th scope="col">#</th>
+					<th scope="col">Nome</th>
+					<th scope="col">Preço</th>		
+					<th></th>			
+				</tr>
+			</thead>
+			<tbody>
+				
+			</tbody>
+		</table>	
+		
+		<hr />
+		
+		<h1>Carrinho</h1>
+			<table class="table" id="item">
+			<thead>
+				<tr>
+					<th scope="col">#</th>
+					<th scope="col">Nome</th>
+					<th scope="col">Preço</th>	
+					<th scope="col">Quantidade</th>	
+					<th scope="col">Total</th>			
+					<th></th>			
+				</tr>
+			</thead>
+			<tbody>
+				
+			</tbody>
+		</table>
+		
+		<div class="form-group">
+				<label for="nome">Total</label>
+				<input type="text" id="total" name="total" class="form-control" readonly="readonly"/>
+			</div>
+			
+			<div class="form-group">
+				<label for="quantidade">Quantidade</label>
+				<input type="text" id="quantidade" name="quantidade" class="form-control" readonly="readonly"/>
+			</div>	
+
+	</div>
+
+
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+		integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+		integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+		crossorigin="anonymous"></script>
+		
+	<script>
+	
+	var carrinho = (new URL(location.href)).searchParams.get('id');
+	$("#carrinho").val(carrinho);
+	
+	
+	function tabelaCarriho(carrinho) {
+		
+		$("#total").val(carrinho.total);
+		$("#quantidade").val(carrinho.quantidadeDeItensNoCarrinho);
+		
+		$("table#item > tbody > tr").remove();
+		  for( var i = 0 ; i < carrinho.itens.length; i++ ){
+			  $("table#item > tbody").append("<tr>" + 
+						"<th scope=\"row\">"+ carrinho.itens[i].produto.id +"</th>" + 
+						"<td>"+ carrinho.itens[i].produto.nome +"</td>" + 
+						"<td>"+ carrinho.itens[i].produto.valor +"</td>" +
+						"<td>"+ carrinho.itens[i].quantidade +"</td>" +
+						"<td>"+ carrinho.itens[i].total +"</td>" +
+						"<td><button id=\"remover\" produto=\"" + carrinho.itens[i].produto.id + "\" class=\"btn btn-danger\">Remover ao carrinho</button>"+
+						"</tr>")
+		  }
+		  removerCarrinho();
+	}
+	
+	function adicionarAoCarrinho() {
+		$("[id^=adicionar]").on("click", function() {
+			var id = $(this).attr("produto");
+			var produto = getProduto(id);
+			
+			console.log(produto);
+			
+			$.ajax({
+				  type:  "POST",
+				  url:  "/api/carrinho/" + carrinho + "/adicionar" ,
+				  data: JSON.stringify(produto),
+				  dataType: "json",
+				  contentType: 'application/json',
+				  success: function(response) {
+					  tabelaCarriho(response);
+				  }				  
+			});
+			
+		});
+	}
+	
+	function removerCarrinho() {
+		$("[id^=remover]").on("click", function() {
+			var id = $(this).attr("produto");
+			var produto = getProduto(id);
+			
+			console.log(produto);
+			
+			$.ajax({
+				  type:  "POST",
+				  url:  "/api/carrinho/" + carrinho + "/remover" ,
+				  data: JSON.stringify(produto),
+				  dataType: "json",
+				  contentType: 'application/json',
+				  success: function(response) {
+					  tabelaCarriho(response);
+				  }				  
+			});
+			
+		});
+	}
+	
+	function tabelaProdutos() {
+		$.getJSON('/api/produtos', function(data) {
+	        $.each(data, function(index) {
+	            $("table#produtos > tbody").append("<tr>" + 
+					"<th scope=\"row\">"+ data[index].id +"</th>" + 
+					"<td>"+ data[index].nome +"</td>" + 
+					"<td>"+ data[index].valor +"</td>" +
+					"<td><button id=\"adicionar\" produto=\"" + data[index].id + "\" class=\"btn btn-info\">Adicionar ao carrinho</button>"+
+					"</tr>");
+					
+	    	});
+	        adicionarAoCarrinho();
+		});
+		
+	}
+	
+	function getProduto(id) {
+		var produto = null;
+		$.ajax({
+			url: '/api/produtos/' + id, 
+			async: false,
+			dataType: 'json',
+			success: function(data) {
+				produto = data;
+			}
+		});
+		return produto;
+	}
+	
+	function getCarrinho(id) {
+		var carrinho = null;
+		$.ajax({
+			url: '/api/carrinho/' + id, 
+			async: false,
+			dataType: 'json',
+			success: function(data) {
+				carrinho = data;
+			}
+		});
+		return carrinho;
+	}
+	
+
+	function abrirCarrinho(id) {
+		var carrinho = getCarrinho(id);
+		
+		tabelaCarriho(carrinho);
+		
+	}
+		
+	tabelaProdutos();
+	adicionarAoCarrinho();
+ 	abrirCarrinho(carrinho);
+	
+	
+    
+	 		
+	</script>	
+
+</body>
+
+
+</html>
